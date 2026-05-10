@@ -2,9 +2,9 @@ name: CI / CD Workflow
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "v1.0.0" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "v1.0.0" ]
 
 jobs:
   # -------------------------------------------

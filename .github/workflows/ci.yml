@@ -69,25 +69,47 @@ jobs:
         uses: github/codeql-action/analyze@v3
 
 
+  # -------------------------------------------
+  # JOB 4: Deploy to Staging
+  # -------------------------------------------
   deploy-staging:
-    needs: [ run-tests, scan-secrets, code-scanning ] # Only runs if tests pass
+    if: github.event_name == 'push'
+    needs: [ run-tests, scan-secrets, code-scanning ]
     runs-on: ubuntu-latest
-    environment: staging
+    environment: staging # This tells GitHub to pull from the "staging" environment secrets
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Deploy to Staging Server
-        run: echo "🚀 Simulating deployment to Staging..."
 
+      - name: Inject Config and Secrets
+        env:
+          API_URL: ${{ vars.API_BASE_URL }}     # Pulls from Environment Variables (Config)
+          API_KEY: ${{ secrets.API_SECRET_KEY }} # Pulls from Environment Secrets
+        run: |
+          echo "🚀 Simulating deployment to Staging..."
+          echo "Connecting to: $API_URL"
+          echo "Using API Key: $API_KEY"
+
+  # -------------------------------------------
+  # JOB 5: Deploy to Production
+  # -------------------------------------------
   deploy-production:
-    needs: deploy-staging # Only runs if staging deployment is successful
+    if: github.event_name == 'push'
+    needs: deploy-staging
     runs-on: ubuntu-latest
-    environment: production
+    environment: production # This tells GitHub to pull from the "production" environment secrets
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Deploy to Production Server
-        run: echo "🌍 Simulating deployment to Production..."
+
+      - name: Inject Config and Secrets
+        env:
+          API_URL: ${{ vars.API_BASE_URL }}     # Pulls from Environment Variables (Config)
+          API_KEY: ${{ secrets.API_SECRET_KEY }} # Pulls from Environment Secrets
+        run: |
+          echo "🌍 Simulating deployment to Production..."
+          echo "Connecting to: $API_URL"
+          echo "Using API Key: $API_KEY"
 
 
   # -------------------------------------------

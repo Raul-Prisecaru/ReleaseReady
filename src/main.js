@@ -1,95 +1,60 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Target the root element in your HTML (e.g., <div id="app"></div>)
-    const appContainer = document.getElementById('app');
+import './style.css'
+import javascriptLogo from './assets/javascript.svg'
+import viteLogo from './assets/vite.svg'
+import heroImg from './assets/hero.png'
+import { setupCounter } from './counter.js'
 
-    // 2. Define the HTML structure
-    const uiLayout = `
-        <header class="topbar">
-            <div class="logo">StatusFeed</div>
-            <div class="auth-actions">
-                <button id="loginBtn" class="btn btn-outline">Log In</button>
-                <button id="signupBtn" class="btn btn-solid">Sign Up</button>
-            </div>
-        </header>
+document.querySelector('#app').innerHTML = `
+<section id="center">
+  <div class="hero">
+    <img src="${heroImg}" class="base" width="170" height="179">
+    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
+    <img src="${viteLogo}" class="vite" alt="Vite logo" />
+  </div>
+  <div>
+    <h1>Get started</h1>
+    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
+  </div>
+  <button id="counter" type="button" class="counter"></button>
+</section>
 
-        <main class="feed-container">
-            <h2 class="feed-title">Recent Updates</h2>
-            
-            <div class="status-card">
-                <div class="status-header">
-                    <span class="username">@dev_guru</span>
-                    <span class="timestamp">2h ago</span>
-                </div>
-                <p class="status-content">Just finished routing the new API endpoints. Everything is running smoothly! 🚀</p>
-            </div>
+<div class="ticks"></div>
 
-            <div class="status-card">
-                <div class="status-header">
-                    <span class="username">@design_ninja</span>
-                    <span class="timestamp">5h ago</span>
-                </div>
-                <p class="status-content">Experimenting with CSS grid for the new dashboard layout. The possibilities are endless.</p>
-            </div>
-        </main>
+<section id="next-steps">
+  <div id="docs">
+    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
+    <h2>Documentation</h2>
+    <p>Your questions, answered</p>
+    <ul>
+      <li>
+        <a href="https://vite.dev/" target="_blank">
+          <img class="logo" src="${viteLogo}" alt="" />
+          Explore Vite
+        </a>
+      </li>
+      <li>
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
+          <img class="button-icon" src="${javascriptLogo}" alt="">
+          Learn more
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div id="social">
+    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
+    <h2>Connect with us</h2>
+    <p>Join the Vite community</p>
+    <ul>
+      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
+      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
+      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
+      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
+    </ul>
+  </div>
+</section>
 
-        <div id="authModal" class="modal hidden">
-            <div class="modal-box">
-                <span class="close-btn" id="closeModal">&times;</span>
-                <h2 id="modalTitle">Welcome</h2>
-                <form id="authForm" onsubmit="event.preventDefault();">
-                    <div class="input-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" placeholder="Enter your username" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Enter your password" required>
-                    </div>
-                    <button type="submit" class="btn btn-solid full-width" id="submitBtn">Submit</button>
-                </form>
-            </div>
-        </div>
-    `;
+<div class="ticks"></div>
+<section id="spacer"></section>
+`
 
-    // 3. Inject HTML into the DOM
-    if (appContainer) {
-        appContainer.innerHTML = uiLayout;
-    } else {
-        console.error("Could not find an element with id='app' to inject the UI.");
-        return;
-    }
-
-    // 4. Modal Interactions
-    const modal = document.getElementById('authModal');
-    const loginBtn = document.getElementById('loginBtn');
-    const signupBtn = document.getElementById('signupBtn');
-    const closeModal = document.getElementById('closeModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const submitBtn = document.getElementById('submitBtn');
-
-    // Open Login
-    loginBtn.addEventListener('click', () => {
-        modalTitle.textContent = 'Log In';
-        submitBtn.textContent = 'Log In';
-        modal.classList.remove('hidden');
-    });
-
-    // Open Sign Up
-    signupBtn.addEventListener('click', () => {
-        modalTitle.textContent = 'Create an Account';
-        submitBtn.textContent = 'Sign Up';
-        modal.classList.remove('hidden');
-    });
-
-    // Close Modal via X button
-    closeModal.addEventListener('click', () => {
-        modal.classList.add('hidden');
-    });
-
-    // Close Modal by clicking the dark overlay outside the box
-    window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.classList.add('hidden');
-        }
-    });
-});
+setupCounter(document.querySelector('#counter'))

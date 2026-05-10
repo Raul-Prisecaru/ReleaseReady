@@ -66,6 +66,28 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
 
+
+  deploy-staging:
+    needs: [ run-tests, scan-secrets, code-scanning ] # Only runs if tests pass
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Deploy to Staging Server
+        run: echo "🚀 Simulating deployment to Staging..."
+
+  deploy-production:
+    needs: deploy-staging # Only runs if staging deployment is successful
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Deploy to Production Server
+        run: echo "🌍 Simulating deployment to Production..."
+
+
   # -------------------------------------------
   # JOB 4: PR Greeting
   # -------------------------------------------

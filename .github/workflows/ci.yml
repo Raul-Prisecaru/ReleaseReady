@@ -1,0 +1,125 @@
+name: CI / CD Workflow
+
+on:
+  push:
+    branches: [ "v1.0.0" ]
+  pull_request:
+    branches: [ "v1.0.0" ]
+
+jobs:
+  # -------------------------------------------
+  # JOB 1: Run Build and Unit Tests (Runs on Push & PR)
+  # -------------------------------------------
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install --no-package-lock
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Run Jest Tests
+        run: npm test
+
+  # -------------------------------------------
+  # JOB 2: Secret Scanning (Gitleaks)
+  # -------------------------------------------
+  scan-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to scan the entire commit history
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+
+  # -------------------------------------------
+  # JOB 3: Vulnerability Scanning (CodeQL)
+  # -------------------------------------------
+  code-scanning:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # Required for CodeQL to upload findings
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript # Tells CodeQL what language to look for
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+
+  # -------------------------------------------
+  # JOB 4: Deploy to Staging
+  # -------------------------------------------
+  deploy-staging:
+    if: github.event_name == 'push'
+    needs: [ run-tests, scan-secrets, code-scanning ]
+    runs-on: ubuntu-latest
+    environment: staging # This tells GitHub to pull from the "staging" environment secrets
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Inject Config and Secrets
+        env:
+          API_URL: ${{ vars.API_BASE_URL }}     # Pulls from Environment Variables (Config)
+          API_KEY: ${{ secrets.API_SECRET_KEY }} # Pulls from Environment Secrets
+        run: |
+          echo "🚀 Simulating deployment to Staging..."
+          echo "Connecting to: $API_URL"
+          echo "Using API Key: $API_KEY"
+
+  # -------------------------------------------
+  # JOB 5: Deploy to Production
+  # -------------------------------------------
+  deploy-production:
+    if: github.event_name == 'push'
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production # This tells GitHub to pull from the "production" environment secrets
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Inject Config and Secrets
+        env:
+          API_URL: ${{ vars.API_BASE_URL }}     # Pulls from Environment Variables (Config)
+          API_KEY: ${{ secrets.API_SECRET_KEY }} # Pulls from Environment Secrets
+        run: |
+          echo "🌍 Simulating deployment to Production..."
+          echo "Connecting to: $API_URL"
+          echo "Using API Key: $API_KEY"
+
+
+  # -------------------------------------------
+  # JOB 4: PR Greeting
+  # -------------------------------------------
+  pr-greeting:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print connection message
+        run: |
+          echo "🎉 Connection successful! "
+          echo "A pull request was opened or updated. Ready for code review."

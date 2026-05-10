@@ -1,0 +1,40 @@
+name: CI / CD Workflow
+
+# This defines WHEN the action will run
+on:
+  push:
+    branches: [ "v1.0.0" ] # Runs when you push to the main branch
+  pull_request:
+    branches: [ "v1.0.0" ] # Runs when a PR is made against the main branch
+
+jobs:
+  # JOB 1: Run Unit Tests (Triggered only on Push)
+  run-tests:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24' # Use a recent stable version of Node
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest Tests
+        run: npm test
+
+  # JOB 2: Print a Message (Triggered only on Pull Request)
+  pr-greeting:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print connection message
+        run: |
+          echo "🎉 Connection successful! "
+          echo "A pull request was opened or updated. Ready for code review."

@@ -1,0 +1,79 @@
+name: CI / CD Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # -------------------------------------------
+  # JOB 1: Run Unit Tests
+  # -------------------------------------------
+  run-tests:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest Tests
+        run: npm test
+
+  # -------------------------------------------
+  # JOB 2: Secret Scanning (Gitleaks)
+  # -------------------------------------------
+  scan-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to scan the entire commit history
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+
+  # -------------------------------------------
+  # JOB 3: Vulnerability Scanning (CodeQL)
+  # -------------------------------------------
+  code-scanning:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # Required for CodeQL to upload findings
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript # Tells CodeQL what language to look for
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # -------------------------------------------
+  # JOB 4: PR Greeting
+  # -------------------------------------------
+  pr-greeting:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print connection message
+        run: |
+          echo "🎉 Connection successful! "
+          echo "A pull request was opened or updated. Ready for code review."

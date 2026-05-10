@@ -8,10 +8,9 @@ on:
 
 jobs:
   # -------------------------------------------
-  # JOB 1: Run Unit Tests
+  # JOB 1: Run Build and Unit Tests (Runs on Push & PR)
   # -------------------------------------------
   run-tests:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -24,6 +23,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --no-package-lock
+
+      - name: Build Project
+        run: npm run build
 
       - name: Run Jest Tests
         run: npm test

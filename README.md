@@ -1,0 +1,1 @@
+[![CI / CD Workflow](https://github.com/Raul-Prisecaru/ReleaseReady/actions/workflows/ci.yml/badge.svg)](https://github.com/Raul-Prisecaru/ReleaseReady/actions/workflows/ci.yml)
